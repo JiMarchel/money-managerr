@@ -7,27 +7,36 @@ import { PasswordHash } from "../../domain/user/value-objects/password-hash";
 import { Database } from "../database/db";
 import { users } from "../database/schema";
 import { User } from "../../domain/user/entity";
+import { DatabaseError } from "./error";
 
 export class DrizzleUserRepository implements UserRepository {
     constructor(private readonly db: Database) { }
 
     async findByEmail(email: Email): Promise<User | null> {
-        const result = await this.db.select().from(users).where(eq(users.email, email.toString()))
+        try {
+            const result = await this.db.select().from(users).where(eq(users.email, email.toString()))
 
-        if (result.length === 0) {
-            return null;
+            if (result.length === 0) {
+                return null;
+            }
+
+            return this.mapToDomain(result[0])
+        } catch (error) {
+            throw new DatabaseError("Failed to query user", error)
         }
-
-        return this.mapToDomain(result[0])
     }
 
     async save(user: User): Promise<void> {
-        await this.db.insert(users).values(this.mapToPersistence(user))
+        try {
+            await this.db.insert(users).values(this.mapToPersistence(user))
+        } catch (error) {
+            throw new DatabaseError("Failed to save user", error)
+        }
     }
 
     private mapToDomain(row: typeof users.$inferSelect): User {
         const user = Object.create(User.prototype);
-        
+
         Object.assign(user, {
             id: UserId.create(row.id),
             email: Email.create(row.email),
