@@ -12,6 +12,20 @@ import { DatabaseError } from "./error";
 export class DrizzleUserRepository implements UserRepository {
     constructor(private readonly db: Database) { }
 
+    async findById(id: UserId): Promise<User | null> {
+        try {
+            const result = await this.db.select().from(users).where(eq(users.id, id.toString()))
+
+            if (result.length === 0) {
+                return null;
+            }
+
+            return this.mapToDomain(result[0])
+        } catch (error) {
+            throw new DatabaseError("Failed to query user by id", error)
+        }
+    }
+
     async findByEmail(email: Email): Promise<User | null> {
         try {
             const result = await this.db.select().from(users).where(eq(users.email, email.toString()))

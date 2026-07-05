@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { ConflictError } from "../../shared/errors/conflict-error";
 import { ValidationError } from "../../shared/errors/validation-error";
+import { UnauthorizedError } from "../../shared/errors/unauthorized-error";
 import { logger } from "../../shared/logger";
 import { ApiErrorResponse } from "../types/response";
 
@@ -8,6 +9,15 @@ export const errorHandler = (app: Elysia) => app
     .onError((ctx) => {
         const { code, error, set } = ctx;
         const requestId = 'requestId' in ctx ? (ctx.requestId as string) : undefined;
+
+        if (error instanceof UnauthorizedError) {
+            logger.warn({ requestId }, error.message);
+
+            set.status = 401;
+            return {
+                message: error.message,
+            } satisfies ApiErrorResponse;
+        }
 
         if (error instanceof ConflictError) {
             logger.warn({ requestId }, error.message);

@@ -15,13 +15,16 @@ import { NodeCryptoOpaqueTokenService } from "./infrastructure/crypto/opaque-tok
 import { RegisterUseCase } from "./application/auth/register/usecase";
 import { LoginUseCase } from "./application/auth/login/usecase";
 import { RefreshUseCase } from "./application/auth/refresh/usecase";
+import { LogoutUseCase } from "./application/auth/logout/usecase";
+import { GetCurrentUserUseCase } from "./application/user/get-current-user/usecase";
 
 import { RegisterHandler } from "./presentation/handlers/auth/register";
 import { LoginHandler } from "./presentation/handlers/auth/login";
 import { RefreshHandler } from "./presentation/handlers/auth/refresh";
 import { authRoutes } from "./presentation/routes/auth";
 import { LogoutHandler } from "./presentation/handlers/auth/logout";
-import { LogoutUseCase } from "./application/auth/logout/usecase";
+import { GetCurrentUserHandler } from "./presentation/handlers/user/get-current-user";
+import { userRoutes } from "./presentation/routes/user";
 
 // Infrastructure
 const userRepository = new DrizzleUserRepository(db);
@@ -35,12 +38,14 @@ const registerUseCase = new RegisterUseCase(userRepository, passwordHasher);
 const loginUseCase = new LoginUseCase(userRepository, passwordHasher, tokenProvider, opaqueTokenService, refreshSessionRepository);
 const refreshUseCase = new RefreshUseCase(tokenProvider, opaqueTokenService, refreshSessionRepository);
 const logoutUseCase = new LogoutUseCase(refreshSessionRepository, opaqueTokenService);
+const getCurrentUserUseCase = new GetCurrentUserUseCase(userRepository);
 
 // Handlers
 const registerHandler = new RegisterHandler(registerUseCase);
 const loginHandler = new LoginHandler(loginUseCase);
 const refreshHandler = new RefreshHandler(refreshUseCase);
-const logoutHandler = new LogoutHandler(logoutUseCase)
+const logoutHandler = new LogoutHandler(logoutUseCase);
+const getCurrentUserHandler = new GetCurrentUserHandler(getCurrentUserUseCase);
 
 // App
 const app = new Elysia()
@@ -49,6 +54,7 @@ const app = new Elysia()
   .use(requestLogger)
   .use(errorHandler)
   .use(authRoutes(registerHandler, loginHandler, refreshHandler, logoutHandler))
+  .use(userRoutes(getCurrentUserHandler, tokenProvider))
   .listen(4000);
 
 console.log(
