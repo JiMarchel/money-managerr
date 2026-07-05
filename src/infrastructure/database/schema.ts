@@ -7,7 +7,7 @@ export const users = pgTable("users", {
     username: varchar({ length: 255 }).notNull(),
     passwordHash: text("password_hash").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
-    updateAt: timestamp("updated_at").notNull().defaultNow()
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
 })
 
 export const refreshToken = pgTable("refresh_token", {
@@ -33,7 +33,7 @@ export const accounts = pgTable("accounts", {
     currency: char({ length: 3 }).notNull(),
     balanceCache: numeric("balance_cache", { precision: 36, scale: 18 }).notNull().default("0"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
-    updateAt: timestamp("updated_at").notNull().defaultNow()
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
 }, (table) => [
     unique("uq_account_name").on(table.userId, table.name),
     index("idx_accounts_user_id").on(table.userId)
@@ -53,7 +53,7 @@ export const transactions = pgTable("transactions", {
     description: text().notNull(),
     transactionDate: date("transaction_date", { mode: "date" }).notNull().defaultNow(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
-    updateAt: timestamp("updated_at").notNull().defaultNow()
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
 }, (table) => [index("idx_transactions_user_id").on(table.userId), index("idx_transactions_date").on(table.transactionDate)])
 
 export const directionType = pgEnum("direction_type", ["IN", "OUT"])
