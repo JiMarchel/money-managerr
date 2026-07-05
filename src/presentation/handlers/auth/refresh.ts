@@ -6,10 +6,7 @@ export class RefreshHandler {
     constructor(private readonly refreshUseCase: RefreshUseCase) { }
 
     async handle(body: RefreshRequest): Promise<ApiSuccessResponse<RefreshResponse>> {
-        const tokens = await this.refreshUseCase.execute({
-            refreshToken: body.refreshToken,
-            deviceName: body.deviceName
-        });
+        const tokens = await this.refreshUseCase.execute(body);
 
         return {
             message: "Token refreshed successfully",

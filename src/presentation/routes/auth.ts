@@ -2,11 +2,13 @@ import { Elysia, t } from "elysia";
 import { RegisterHandler } from "../handlers/auth/register";
 import { LoginHandler } from "../handlers/auth/login";
 import { RefreshHandler } from "../handlers/auth/refresh";
+import { LogoutHandler } from "../handlers/auth/logout";
 
 export const authRoutes = (
     registerHandler: RegisterHandler,
     loginHandler: LoginHandler,
-    refreshHandler: RefreshHandler
+    refreshHandler: RefreshHandler,
+    logoutHandler: LogoutHandler
 ) =>
     new Elysia({ prefix: "/auth" })
         .post("/register", async ({ body }) => {
@@ -34,4 +36,11 @@ export const authRoutes = (
                 refreshToken: t.String({ minLength: 1 }),
                 deviceName: t.String({ minLength: 1 })
             })
-        });
+        })
+        .post("/logout", async ({ body }) => {
+            return logoutHandler.handle(body);
+        }, {
+            body: t.Object({
+                refreshToken: t.String({ minLength: 1 })
+            })
+        })

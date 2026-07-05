@@ -6,7 +6,7 @@ export class NodeCryptoOpaqueTokenService implements OpaqueTokenService {
     generateToken(): string {
         try {
             // Generate 32 random bytes and convert to base64url for a url-safe token
-            return crypto.randomBytes(32).toString('');
+            return crypto.randomBytes(32).toString('base64url');
         } catch (error) {
             throw new CryptoGenerationError("Failed to generate opaque token", error);
         }

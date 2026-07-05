@@ -6,14 +6,10 @@ export class RegisterHandler {
     constructor(private readonly registerUseCase: RegisterUseCase) { }
 
     async handle(body: RegisterRequest): Promise<ApiSuccessResponse> {
-        await this.registerUseCase.execute({
-            email: body.email,
-            username: body.username,
-            password: body.password
-        });
+        await this.registerUseCase.execute(body);
 
         return {
-            message: "User registered successfully"
+            message: "User registered successfully."
         };
     }
 }

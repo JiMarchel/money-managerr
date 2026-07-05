@@ -6,11 +6,7 @@ export class LoginHandler {
     constructor(private readonly loginUseCase: LoginUseCase) { }
 
     async handle(body: LoginRequest): Promise<ApiSuccessResponse<LoginResponse>> {
-        const tokens = await this.loginUseCase.execute({
-            email: body.email,
-            password: body.password,
-            deviceName: body.deviceName
-        });
+        const tokens = await this.loginUseCase.execute(body);
 
         return {
             message: "User logged in successfully",

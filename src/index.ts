@@ -20,6 +20,8 @@ import { RegisterHandler } from "./presentation/handlers/auth/register";
 import { LoginHandler } from "./presentation/handlers/auth/login";
 import { RefreshHandler } from "./presentation/handlers/auth/refresh";
 import { authRoutes } from "./presentation/routes/auth";
+import { LogoutHandler } from "./presentation/handlers/auth/logout";
+import { LogoutUseCase } from "./application/auth/logout/usecase";
 
 // Infrastructure
 const userRepository = new DrizzleUserRepository(db);
@@ -32,11 +34,13 @@ const opaqueTokenService = new NodeCryptoOpaqueTokenService();
 const registerUseCase = new RegisterUseCase(userRepository, passwordHasher);
 const loginUseCase = new LoginUseCase(userRepository, passwordHasher, tokenProvider, opaqueTokenService, refreshSessionRepository);
 const refreshUseCase = new RefreshUseCase(tokenProvider, opaqueTokenService, refreshSessionRepository);
+const logoutUseCase = new LogoutUseCase(refreshSessionRepository, opaqueTokenService);
 
 // Handlers
 const registerHandler = new RegisterHandler(registerUseCase);
 const loginHandler = new LoginHandler(loginUseCase);
 const refreshHandler = new RefreshHandler(refreshUseCase);
+const logoutHandler = new LogoutHandler(logoutUseCase)
 
 // App
 const app = new Elysia()
@@ -44,7 +48,7 @@ const app = new Elysia()
   .use(requestContext)
   .use(requestLogger)
   .use(errorHandler)
-  .use(authRoutes(registerHandler, loginHandler, refreshHandler))
+  .use(authRoutes(registerHandler, loginHandler, refreshHandler, logoutHandler))
   .listen(4000);
 
 console.log(
