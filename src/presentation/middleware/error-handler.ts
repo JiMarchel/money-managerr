@@ -52,6 +52,13 @@ export const errorHandler = (app: Elysia) => app
             } satisfies ApiErrorResponse;
         }
 
+        if (code === 'NOT_FOUND') {
+            set.status = 404;
+            return {
+                message: "Route not found",
+            } satisfies ApiErrorResponse;
+        }
+
         // Fallback untuk unhandled server error
         logger.error({ requestId, err: error }, "Internal server error");
 
