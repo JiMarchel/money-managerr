@@ -1,0 +1,1 @@
+ALTER TABLE "categories" ADD COLUMN "category_type" "category_type" NOT NULL;

@@ -8,6 +8,13 @@
       "when": 1783070195564,
       "tag": "0000_nasty_hellfire_club",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784126638175,
+      "tag": "0001_cheerful_silvermane",
+      "breakpoints": true
     }
   ]
 }

@@ -39,12 +39,13 @@ export const accounts = pgTable("accounts", {
     index("idx_accounts_user_id").on(table.userId)
 ])
 
-export const cateegoryType = pgEnum("category_type", ["Income", "Expense", "Transfer"])
+export const categoryType = pgEnum("category_type", ["Income", "Expense", "Transfer"])
 
 export const categories = pgTable("categories", {
     id: uuid().primaryKey().default(sql`uuidv7()`),
     userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     name: text().notNull(),
+    type: categoryType("category_type").notNull(),
 }, (table) => [unique("uq_category_name").on(table.userId, table.name), index("idx_categories_user_id").on(table.userId)])
 
 export const transactions = pgTable("transactions", {
