@@ -1,5 +1,5 @@
-import { desc, eq, inArray, sql } from "drizzle-orm";
-import { TransactionRepository } from "../../domain/transaction/repository";
+import { desc, eq, inArray, sql, and, gte, lte } from "drizzle-orm";
+import { TransactionFilters, TransactionRepository } from "../../domain/transaction/repository";
 import { Transaction, TransactionEntry } from "../../domain/transaction/entity";
 import { UserId } from "../../domain/user/value-objects/user-id";
 import { Database } from "../database/db";
@@ -17,11 +17,20 @@ import { TransactionDate } from "../../domain/transaction/value-objects/transact
 export class DrizzleTransactionRepository implements TransactionRepository {
     constructor(private readonly db: Database) { }
 
-    async findByUserId(userId: UserId): Promise<Transaction[]> {
+    async findByUserId(userId: UserId, filters?: TransactionFilters): Promise<Transaction[]> {
         try {
+            const conditions = [eq(transactions.userId, userId.toString())];
+            
+            if (filters?.startDate) {
+                conditions.push(gte(transactions.transactionDate, filters.startDate));
+            }
+            if (filters?.endDate) {
+                conditions.push(lte(transactions.transactionDate, filters.endDate));
+            }
+
             const txsResult = await this.db.select()
                 .from(transactions)
-                .where(eq(transactions.userId, userId.toString()))
+                .where(and(...conditions))
                 .orderBy(desc(transactions.transactionDate), desc(transactions.createdAt));
 
             if (txsResult.length === 0) return [];

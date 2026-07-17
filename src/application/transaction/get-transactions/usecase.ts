@@ -5,7 +5,12 @@ export class GetTransactionsUseCase {
     constructor(private readonly transactionRepository: TransactionRepository) {}
 
     async execute(query: GetTransactionsQuery) {
-        const transactions = await this.transactionRepository.findByUserId(query.userId);
+        const filters = {
+            startDate: query.startDate ? new Date(query.startDate) : undefined,
+            endDate: query.endDate ? new Date(query.endDate) : undefined
+        };
+
+        const transactions = await this.transactionRepository.findByUserId(query.userId, filters);
 
         return transactions.map(transaction => ({
             id: transaction.id.toString(),

@@ -5,9 +5,11 @@ import { ApiSuccessResponse } from "../../types/response";
 export class GetTransactionsHandler {
     constructor(private readonly getTransactionsUseCase: GetTransactionsUseCase) {}
 
-    async handle(userId: UserId): Promise<ApiSuccessResponse<any>> {
+    async handle(userId: UserId, requestQuery: { startDate?: string; endDate?: string }): Promise<ApiSuccessResponse<any>> {
         const query = {
-            userId
+            userId,
+            startDate: requestQuery.startDate,
+            endDate: requestQuery.endDate
         };
 
         const result = await this.getTransactionsUseCase.execute(query);

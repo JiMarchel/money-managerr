@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { CreateTransactionHandler } from "../handlers/transaction/create-transaction";
 import { CreateTransferHandler } from "../handlers/transaction/create-transfer";
 import { GetTransactionsHandler } from "../handlers/transaction/get-transactions";
@@ -32,11 +32,15 @@ export const transactionRoutes = (
             summary: "Create a new transfer between wallets"
         }
     })
-    .get("/", async ({ userId }) => {
-        return getTransactionsHandler.handle(userId);
+    .get("/", async ({ userId, query }) => {
+        return getTransactionsHandler.handle(userId, query);
     }, {
+        query: t.Object({
+            startDate: t.Optional(t.String({ format: "date", error: "startDate must be a valid date format (YYYY-MM-DD)" })),
+            endDate: t.Optional(t.String({ format: "date", error: "endDate must be a valid date format (YYYY-MM-DD)" }))
+        }),
         detail: {
             tags: ["Transaction"],
-            summary: "Get all transactions"
+            summary: "Get all transactions with optional date filters"
         }
     });
