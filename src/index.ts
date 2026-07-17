@@ -10,6 +10,7 @@ import { DrizzleUserRepository } from "./infrastructure/repositories/user";
 import { DrizzleRefreshSessionRepository } from "./infrastructure/repositories/refresh-session";
 import { DrizzleWalletRepository } from "./infrastructure/repositories/wallet";
 import { DrizzleCategoryRepository } from "./infrastructure/repositories/category";
+import { DrizzleTransactionRepository } from "./infrastructure/repositories/transaction";
 import { Argon2PasswordHasher } from "./infrastructure/crypto/hasher";
 import { JwtTokenProvider } from "./infrastructure/crypto/jwt";
 import { NodeCryptoOpaqueTokenService } from "./infrastructure/crypto/opaque-token";
@@ -23,6 +24,9 @@ import { CreateWalletUseCase } from "./application/wallet/create-wallet/usecase"
 import { GetWalletsUseCase } from "./application/wallet/get-wallets/usecase";
 import { CreateCategoryUseCase } from "./application/category/create-category/usecase";
 import { GetCategoriesUseCase } from "./application/category/get-categories/usecase";
+import { CreateTransactionUseCase } from "./application/transaction/create-transaction/usecase";
+import { CreateTransferUseCase } from "./application/transaction/create-transfer/usecase";
+import { GetTransactionsUseCase } from "./application/transaction/get-transactions/usecase";
 
 import { RegisterHandler } from "./presentation/handlers/auth/register";
 import { LoginHandler } from "./presentation/handlers/auth/login";
@@ -37,6 +41,10 @@ import { walletRoutes } from "./presentation/routes/wallet";
 import { CreateCategoryHandler } from "./presentation/handlers/category/create-category";
 import { GetCategoriesHandler } from "./presentation/handlers/category/get-categories";
 import { categoryRoutes } from "./presentation/routes/category";
+import { CreateTransactionHandler } from "./presentation/handlers/transaction/create-transaction";
+import { CreateTransferHandler } from "./presentation/handlers/transaction/create-transfer";
+import { GetTransactionsHandler } from "./presentation/handlers/transaction/get-transactions";
+import { transactionRoutes } from "./presentation/routes/transaction";
 
 // Infrastructure
 const userRepository = new DrizzleUserRepository(db);
@@ -46,6 +54,7 @@ const tokenProvider = new JwtTokenProvider(env.JWT_SECRET);
 const opaqueTokenService = new NodeCryptoOpaqueTokenService();
 const walletRepository = new DrizzleWalletRepository(db);
 const categoryRepository = new DrizzleCategoryRepository(db);
+const transactionRepository = new DrizzleTransactionRepository(db);
 
 // Use Cases
 const registerUseCase = new RegisterUseCase(userRepository, passwordHasher);
@@ -57,6 +66,9 @@ const createWalletUseCase = new CreateWalletUseCase(walletRepository);
 const getWalletsUseCase = new GetWalletsUseCase(walletRepository);
 const createCategoryUseCase = new CreateCategoryUseCase(categoryRepository);
 const getCategoriesUseCase = new GetCategoriesUseCase(categoryRepository);
+const createTransactionUseCase = new CreateTransactionUseCase(transactionRepository);
+const createTransferUseCase = new CreateTransferUseCase(transactionRepository);
+const getTransactionsUseCase = new GetTransactionsUseCase(transactionRepository);
 
 // Handlers
 const registerHandler = new RegisterHandler(registerUseCase);
@@ -68,6 +80,9 @@ const createWalletHandler = new CreateWalletHandler(createWalletUseCase);
 const getWalletsHandler = new GetWalletsHandler(getWalletsUseCase);
 const createCategoryHandler = new CreateCategoryHandler(createCategoryUseCase);
 const getCategoriesHandler = new GetCategoriesHandler(getCategoriesUseCase);
+const createTransactionHandler = new CreateTransactionHandler(createTransactionUseCase);
+const createTransferHandler = new CreateTransferHandler(createTransferUseCase);
+const getTransactionsHandler = new GetTransactionsHandler(getTransactionsUseCase);
 
 // App
 const app = new Elysia()
@@ -79,6 +94,7 @@ const app = new Elysia()
   .use(userRoutes(getCurrentUserHandler, tokenProvider))
   .use(walletRoutes(createWalletHandler, getWalletsHandler, tokenProvider))
   .use(categoryRoutes(createCategoryHandler, getCategoriesHandler, tokenProvider))
+  .use(transactionRoutes(createTransactionHandler, createTransferHandler, getTransactionsHandler, tokenProvider))
   .listen(4000);
 
 console.log(
