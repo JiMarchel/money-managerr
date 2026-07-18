@@ -2,7 +2,7 @@ import { sql } from "drizzle-orm";
 import { char, check, date, index, numeric, pgEnum, pgTable, text, timestamp, unique, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
-    id: uuid().primaryKey().default(sql`uuidv7()`),
+    id: uuid().primaryKey().defaultRandom(),
     email: varchar({ length: 255 }).notNull().unique(),
     username: varchar({ length: 255 }).notNull(),
     passwordHash: text("password_hash").notNull(),
@@ -11,7 +11,7 @@ export const users = pgTable("users", {
 })
 
 export const refreshToken = pgTable("refresh_token", {
-    id: uuid().primaryKey().default(sql`uuidv7()`),
+    id: uuid().primaryKey().defaultRandom(),
     userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     tokenHash: text("token_hash").notNull().unique(),
     deviceName: text("device_name").notNull(),
@@ -26,7 +26,7 @@ export const refreshToken = pgTable("refresh_token", {
 export const accountType = pgEnum("account_type", ["Cash", "Bank", "Credit Card", "Savings", "Investment", "E-Wallet", "Crypto", "Loan"])
 
 export const accounts = pgTable("accounts", {
-    id: uuid().primaryKey().default(sql`uuidv7()`),
+    id: uuid().primaryKey().defaultRandom(),
     userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     name: text().notNull(),
     accountType: accountType("account_type").notNull(),
@@ -42,14 +42,14 @@ export const accounts = pgTable("accounts", {
 export const categoryType = pgEnum("category_type", ["Income", "Expense", "Transfer"])
 
 export const categories = pgTable("categories", {
-    id: uuid().primaryKey().default(sql`uuidv7()`),
+    id: uuid().primaryKey().defaultRandom(),
     userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     name: text().notNull(),
     type: categoryType("category_type").notNull(),
 }, (table) => [unique("uq_category_name").on(table.userId, table.name), index("idx_categories_user_id").on(table.userId)])
 
 export const transactions = pgTable("transactions", {
-    id: uuid().primaryKey().default(sql`uuidv7()`),
+    id: uuid().primaryKey().defaultRandom(),
     userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     description: text().notNull(),
     transactionDate: date("transaction_date", { mode: "date" }).notNull().defaultNow(),
@@ -60,7 +60,7 @@ export const transactions = pgTable("transactions", {
 export const directionType = pgEnum("direction_type", ["IN", "OUT"])
 
 export const transactionEntries = pgTable("transaction_entries", {
-    id: uuid().primaryKey().default(sql`uuidv7()`),
+    id: uuid().primaryKey().defaultRandom(),
     transactionId: uuid("transaction_id").notNull().references(() => transactions.id, { onDelete: "cascade" }),
     accountId: uuid("account_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
     categoryId: uuid("category_id").references(() => categories.id, { onDelete: "set null" }),
