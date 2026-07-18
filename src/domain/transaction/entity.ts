@@ -109,6 +109,56 @@ export class Transaction {
         return new Transaction(transactionId, userId, description, date, [sourceEntry, destinationEntry]);
     }
 
+    static updateIncomeOrExpense(
+        transactionId: TransactionId,
+        userId: UserId,
+        accountId: WalletId,
+        categoryId: CategoryId,
+        amount: Amount,
+        direction: Direction,
+        description: Description,
+        date: TransactionDate
+    ): Transaction {
+        const entry = TransactionEntry.create(
+            transactionId,
+            accountId,
+            categoryId,
+            amount,
+            direction
+        );
+        return new Transaction(transactionId, userId, description, date, [entry]);
+    }
+
+    static updateTransfer(
+        transactionId: TransactionId,
+        userId: UserId,
+        sourceAccountId: WalletId,
+        destinationAccountId: WalletId,
+        amount: Amount,
+        description: Description,
+        date: TransactionDate
+    ): Transaction {
+        // OUT from source
+        const sourceEntry = TransactionEntry.create(
+            transactionId,
+            sourceAccountId,
+            null,
+            amount,
+            Direction.create("OUT")
+        );
+
+        // IN to destination
+        const destinationEntry = TransactionEntry.create(
+            transactionId,
+            destinationAccountId,
+            null,
+            amount,
+            Direction.create("IN")
+        );
+
+        return new Transaction(transactionId, userId, description, date, [sourceEntry, destinationEntry]);
+    }
+
     // Constructor mapping for DB hydration
     static load(
         id: TransactionId,

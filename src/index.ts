@@ -11,6 +11,7 @@ import { DrizzleRefreshSessionRepository } from "./infrastructure/repositories/r
 import { DrizzleWalletRepository } from "./infrastructure/repositories/wallet";
 import { DrizzleCategoryRepository } from "./infrastructure/repositories/category";
 import { DrizzleTransactionRepository } from "./infrastructure/repositories/transaction";
+import { DrizzleStatisticsRepository } from "./infrastructure/repositories/statistics";
 import { Argon2PasswordHasher } from "./infrastructure/crypto/hasher";
 import { JwtTokenProvider } from "./infrastructure/crypto/jwt";
 import { NodeCryptoOpaqueTokenService } from "./infrastructure/crypto/opaque-token";
@@ -27,6 +28,11 @@ import { GetCategoriesUseCase } from "./application/category/get-categories/usec
 import { CreateTransactionUseCase } from "./application/transaction/create-transaction/usecase";
 import { CreateTransferUseCase } from "./application/transaction/create-transfer/usecase";
 import { GetTransactionsUseCase } from "./application/transaction/get-transactions/usecase";
+import { GetTransactionUseCase } from "./application/transaction/get-transaction/usecase";
+import { UpdateTransactionUseCase } from "./application/transaction/update-transaction/usecase";
+import { UpdateTransferUseCase } from "./application/transaction/update-transfer/usecase";
+import { DeleteTransactionUseCase } from "./application/transaction/delete-transaction/usecase";
+import { GetStatisticsUseCase } from "./application/statistics/get-statistics/usecase";
 
 import { RegisterHandler } from "./presentation/handlers/auth/register";
 import { LoginHandler } from "./presentation/handlers/auth/login";
@@ -44,7 +50,13 @@ import { categoryRoutes } from "./presentation/routes/category";
 import { CreateTransactionHandler } from "./presentation/handlers/transaction/create-transaction";
 import { CreateTransferHandler } from "./presentation/handlers/transaction/create-transfer";
 import { GetTransactionsHandler } from "./presentation/handlers/transaction/get-transactions";
+import { GetTransactionHandler } from "./presentation/handlers/transaction/get-transaction";
+import { UpdateTransactionHandler } from "./presentation/handlers/transaction/update-transaction";
+import { UpdateTransferHandler } from "./presentation/handlers/transaction/update-transfer";
+import { DeleteTransactionHandler } from "./presentation/handlers/transaction/delete-transaction";
 import { transactionRoutes } from "./presentation/routes/transaction";
+import { GetStatisticsHandler } from "./presentation/handlers/statistics/get-statistics";
+import { statisticsRoutes } from "./presentation/routes/statistics";
 
 // Infrastructure
 const userRepository = new DrizzleUserRepository(db);
@@ -55,6 +67,7 @@ const opaqueTokenService = new NodeCryptoOpaqueTokenService();
 const walletRepository = new DrizzleWalletRepository(db);
 const categoryRepository = new DrizzleCategoryRepository(db);
 const transactionRepository = new DrizzleTransactionRepository(db);
+const statisticsRepository = new DrizzleStatisticsRepository(db);
 
 // Use Cases
 const registerUseCase = new RegisterUseCase(userRepository, passwordHasher);
@@ -69,6 +82,11 @@ const getCategoriesUseCase = new GetCategoriesUseCase(categoryRepository);
 const createTransactionUseCase = new CreateTransactionUseCase(transactionRepository);
 const createTransferUseCase = new CreateTransferUseCase(transactionRepository);
 const getTransactionsUseCase = new GetTransactionsUseCase(transactionRepository);
+const getTransactionUseCase = new GetTransactionUseCase(transactionRepository);
+const updateTransactionUseCase = new UpdateTransactionUseCase(transactionRepository);
+const updateTransferUseCase = new UpdateTransferUseCase(transactionRepository);
+const deleteTransactionUseCase = new DeleteTransactionUseCase(transactionRepository);
+const getStatisticsUseCase = new GetStatisticsUseCase(statisticsRepository);
 
 // Handlers
 const registerHandler = new RegisterHandler(registerUseCase);
@@ -83,6 +101,11 @@ const getCategoriesHandler = new GetCategoriesHandler(getCategoriesUseCase);
 const createTransactionHandler = new CreateTransactionHandler(createTransactionUseCase);
 const createTransferHandler = new CreateTransferHandler(createTransferUseCase);
 const getTransactionsHandler = new GetTransactionsHandler(getTransactionsUseCase);
+const getTransactionHandler = new GetTransactionHandler(getTransactionUseCase);
+const updateTransactionHandler = new UpdateTransactionHandler(updateTransactionUseCase);
+const updateTransferHandler = new UpdateTransferHandler(updateTransferUseCase);
+const deleteTransactionHandler = new DeleteTransactionHandler(deleteTransactionUseCase);
+const getStatisticsHandler = new GetStatisticsHandler(getStatisticsUseCase);
 
 // App
 const app = new Elysia()
@@ -94,7 +117,17 @@ const app = new Elysia()
   .use(userRoutes(getCurrentUserHandler, tokenProvider))
   .use(walletRoutes(createWalletHandler, getWalletsHandler, tokenProvider))
   .use(categoryRoutes(createCategoryHandler, getCategoriesHandler, tokenProvider))
-  .use(transactionRoutes(createTransactionHandler, createTransferHandler, getTransactionsHandler, tokenProvider))
+  .use(transactionRoutes(
+      createTransactionHandler, 
+      createTransferHandler, 
+      getTransactionsHandler, 
+      getTransactionHandler,
+      updateTransactionHandler,
+      updateTransferHandler,
+      deleteTransactionHandler,
+      tokenProvider
+  ))
+  .use(statisticsRoutes(getStatisticsHandler, tokenProvider))
   .listen(4000);
 
 console.log(
